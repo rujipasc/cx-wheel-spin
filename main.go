@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "cx-wheel-of-name-native",
+		Title:  "cx-wheel-spin",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
