@@ -29,9 +29,12 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install MinGW (for CGO)
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+        shell: pwsh
+        run: |
+          choco install mingw --yes --no-progress
+          $gccDir = "C:\ProgramData\mingw64\mingw64\bin"
+          if (-not (Test-Path $gccDir)) { throw "MinGW bin not found: $gccDir" }
+          Add-Content -Path $env:GITHUB_PATH -Value $gccDir
 
       - name: Install frontend dependencies
         working-directory: frontend
