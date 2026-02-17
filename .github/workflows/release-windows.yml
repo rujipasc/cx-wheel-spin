@@ -11,8 +11,6 @@ permissions:
 jobs:
   build-and-release:
     runs-on: windows-latest
-    env:
-      APP_NAME: cx-wheel-spin
 
     steps:
       - name: Checkout
@@ -54,14 +52,23 @@ jobs:
       - name: Build Wails app (Windows AMD64)
         shell: pwsh
         run: |
-          wails doctor
           wails build -clean -platform windows/amd64
+
+      - name: Resolve output artifact name
+        id: app_meta
+        shell: pwsh
+        run: |
+          $cfg = Get-Content wails.json | ConvertFrom-Json
+          $name = $cfg.outputfilename
+          if (-not $name) { $name = $cfg.name }
+          if (-not $name) { throw "Unable to resolve app name from wails.json" }
+          "app_name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Package build as zip
         shell: pwsh
         run: |
-          $exePath = "build/bin/${{ env.APP_NAME }}.exe"
-          $zipPath = "build/bin/${{ env.APP_NAME }}-windows-amd64.zip"
+          $exePath = "build/bin/${{ steps.app_meta.outputs.app_name }}.exe"
+          $zipPath = "build/bin/${{ steps.app_meta.outputs.app_name }}-windows-amd64.zip"
           Compress-Archive -Path $exePath -DestinationPath $zipPath -Force
 
       - name: Create GitHub Release
